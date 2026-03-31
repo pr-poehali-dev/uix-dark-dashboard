@@ -2,40 +2,31 @@ import { useState } from "react";
 import Sidebar from "./dashboard/Sidebar";
 import Header from "./dashboard/Header";
 import KpiCards from "./dashboard/KpiCards";
-import RevenueChart from "./dashboard/RevenueChart";
-import CategoryStats from "./dashboard/CategoryStats";
-import DonutChart from "./dashboard/DonutChart";
-import TopTable from "./dashboard/TopTable";
+import CityTable from "./dashboard/CityTable";
+import ReasonsChart from "./dashboard/ReasonsChart";
+import ConversionMap from "./dashboard/ConversionMap";
 
-export type Period = "7d" | "30d" | "90d";
+export type ViewTab = "overview" | "table" | "reasons" | "cities";
 
 export default function Dashboard() {
-  const [period, setPeriod] = useState<Period>("30d");
-  const [activeSection, setActiveSection] = useState("overview");
+  const [tab, setTab] = useState<ViewTab>("overview");
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
-      <Sidebar activeSection={activeSection} onSection={setActiveSection} />
+      <Sidebar activeTab={tab} onTab={setTab} />
       <div className="flex-1 flex flex-col overflow-hidden">
-        <Header period={period} onPeriod={setPeriod} />
-        <main className="flex-1 overflow-y-auto p-6 space-y-6">
-          <KpiCards period={period} />
+        <Header />
+        <main className="flex-1 overflow-y-auto p-6 space-y-5">
+          <KpiCards />
           <div className="grid grid-cols-12 gap-5">
-            <div className="col-span-12 lg:col-span-8">
-              <RevenueChart period={period} />
+            <div className="col-span-12 xl:col-span-8">
+              <ReasonsChart />
             </div>
-            <div className="col-span-12 lg:col-span-4">
-              <DonutChart />
+            <div className="col-span-12 xl:col-span-4">
+              <ConversionMap />
             </div>
           </div>
-          <div className="grid grid-cols-12 gap-5">
-            <div className="col-span-12 lg:col-span-7">
-              <CategoryStats />
-            </div>
-            <div className="col-span-12 lg:col-span-5">
-              <TopTable />
-            </div>
-          </div>
+          <CityTable />
         </main>
       </div>
     </div>
