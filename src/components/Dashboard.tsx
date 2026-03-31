@@ -13,7 +13,7 @@ export default function Dashboard() {
   const [tab, setTab] = useState<ViewTab>("overview");
 
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
+    <div className="flex h-screen overflow-hidden" style={{ background: "linear-gradient(180deg, #080d1e 0%, #0b1135 50%, #060a1a 100%)" }}>
       <Sidebar activeTab={tab} onTab={setTab} />
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header />

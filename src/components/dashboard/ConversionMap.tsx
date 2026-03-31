@@ -12,19 +12,11 @@ const CITIES = [
 ];
 
 function getColor(conv: number) {
-  if (conv >= 40) return "var(--green)";
-  if (conv >= 32) return "var(--cyan)";
-  if (conv >= 26) return "var(--blue)";
-  if (conv >= 20) return "var(--amber)";
-  return "var(--red)";
-}
-
-function getColorDim(conv: number) {
-  if (conv >= 40) return "var(--green-dim)";
-  if (conv >= 32) return "var(--cyan-dim)";
-  if (conv >= 26) return "var(--blue-dim)";
-  if (conv >= 20) return "var(--amber-dim)";
-  return "var(--red-dim)";
+  if (conv >= 40) return "#01b574";
+  if (conv >= 32) return "#0075ff";
+  if (conv >= 26) return "#4299e1";
+  if (conv >= 20) return "#f6ad55";
+  return "#e31a1a";
 }
 
 export default function ConversionMap() {
@@ -32,80 +24,73 @@ export default function ConversionMap() {
   const max = Math.max(...CITIES.map((c) => c.conv));
 
   return (
-    <div className="glass rounded-2xl p-5 h-full animate-rise" style={{ animationDelay: "210ms" }}>
+    <div className="vui-card rounded-2xl p-5 h-full animate-rise" style={{ animationDelay: "210ms" }}>
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
         <div>
-          <h2 className="text-[13px] font-semibold text-foreground">Конверсия по городам</h2>
-          <p className="text-[11px] mt-0.5" style={{ color: "hsl(var(--muted-foreground))" }}>
+          <h2 className="text-[14px] font-bold text-white">Конверсия по городам</h2>
+          <p className="text-[11px] mt-0.5" style={{ color: "#a0aec0" }}>
             Топ-8 городов по результату
           </p>
         </div>
-        <div className="flex items-center gap-3 text-[10px]" style={{ color: "hsl(var(--muted-foreground))" }}>
-          {[["≥40%", "var(--green)"], ["≥32%", "var(--cyan)"], ["≥26%", "var(--blue)"], ["<26%", "var(--amber)"]].map(([label, color]) => (
-            <div key={label} className="flex items-center gap-1">
-              <div className="w-2 h-2 rounded-full" style={{ background: color }} />
+        <div className="flex items-center gap-3 text-[10px] font-semibold" style={{ color: "#a0aec0" }}>
+          {[["≥40%", "#01b574"], ["≥32%", "#0075ff"], ["≥26%", "#4299e1"], ["<26%", "#f6ad55"]].map(([label, color]) => (
+            <div key={label} className="flex items-center gap-1.5">
+              <div className="w-2 h-2 rounded-full" style={{ background: color as string }} />
               {label}
             </div>
           ))}
         </div>
       </div>
 
-      {/* List */}
       <div className="space-y-2">
         {CITIES.map((city, i) => {
           const color = getColor(city.conv);
-          const colorDim = getColorDim(city.conv);
           const pct = (city.conv / max) * 100;
           const isHov = hovered === i;
 
           return (
             <div
               key={city.name}
-              className="group flex items-center gap-3 rounded-xl px-3 py-2.5 cursor-default transition-all duration-150"
+              className="flex items-center gap-3 rounded-xl px-3 py-2.5 cursor-default transition-all duration-150"
               style={{
-                background: isHov ? colorDim : "rgba(255,255,255,0.02)",
-                border: `1px solid ${isHov ? color + "33" : "rgba(255,255,255,0.04)"}`,
+                background: isHov ? `${color}18` : "rgba(255,255,255,0.02)",
+                border: `1px solid ${isHov ? color + "40" : "rgba(86,87,122,0.2)"}`,
               }}
               onMouseEnter={() => setHovered(i)}
               onMouseLeave={() => setHovered(null)}
             >
-              {/* Rank */}
               <span
-                className="w-5 text-center text-[11px] font-semibold font-mono-num flex-shrink-0"
-                style={{ color: i < 3 ? color : "hsl(var(--muted-foreground))" }}
+                className="w-5 text-center text-[11px] font-bold font-mono-num flex-shrink-0"
+                style={{ color: i < 3 ? color : "#56577a" }}
               >
                 {city.rank}
               </span>
 
-              {/* Name */}
               <span
-                className="text-[12.5px] font-medium w-36 flex-shrink-0 truncate transition-colors duration-150"
-                style={{ color: isHov ? "hsl(var(--foreground))" : "hsl(var(--sidebar-foreground))" }}
+                className="text-[12.5px] font-semibold w-36 flex-shrink-0 truncate transition-colors duration-150"
+                style={{ color: isHov ? "#fff" : "#a0aec0" }}
               >
                 {city.name}
               </span>
 
-              {/* Bar */}
               <div className="flex-1 relative h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.05)" }}>
                 <div
                   className="h-full rounded-full bar-fill"
                   style={{
                     width: `${pct}%`,
-                    background: `linear-gradient(90deg, ${color}bb, ${color})`,
-                    boxShadow: isHov ? `0 0 8px ${color}66` : "none",
+                    background: `linear-gradient(90deg, ${color}88, ${color})`,
+                    boxShadow: isHov ? `0 0 10px ${color}66` : "none",
                   }}
                 />
               </div>
 
-              {/* Calls */}
-              <span className="w-16 text-right text-[10px] flex-shrink-0" style={{ color: "hsl(var(--muted-foreground))" }}>
+              <span className="w-16 text-right text-[10px] font-medium flex-shrink-0" style={{ color: "#56577a" }}>
                 {city.calls.toLocaleString("ru")}
               </span>
 
-              {/* Percent */}
               <span
-                className="w-10 text-right text-[13px] font-semibold font-mono-num flex-shrink-0"
+                className="w-10 text-right text-[13px] font-bold font-mono-num flex-shrink-0"
                 style={{ color }}
               >
                 {city.conv}%
