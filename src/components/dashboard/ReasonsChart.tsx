@@ -1,146 +1,158 @@
 import { useState } from "react";
-import { totals, reasonLabels } from "@/data/callcenter";
 
-const reasons = reasonLabels
-  .map((r) => ({ ...r, count: totals[r.key] as number }))
-  .sort((a, b) => b.count - a.count);
+const DATA = [
+  { label: "Согласился",     value: 38, color: "var(--green)",  colorDim: "var(--green-dim)" },
+  { label: "Перезвон",       value: 22, color: "var(--blue)",   colorDim: "var(--blue-dim)"  },
+  { label: "Не интересует",  value: 18, color: "var(--red)",    colorDim: "var(--red-dim)"   },
+  { label: "Занято / н/о",   value: 13, color: "var(--amber)",  colorDim: "var(--amber-dim)" },
+  { label: "Другое",         value: 9,  color: "var(--purple)", colorDim: "var(--purple-dim)"},
+];
 
-const total = reasons.reduce((s, r) => s + r.count, 0);
+const CX = 90, CY = 90, R_OUT = 74, R_IN = 44;
 
-function DonutChart() {
-  const [hovered, setHovered] = useState<number | null>(null);
-  const cx = 90;
-  const cy = 90;
-  const R = 68;
-  const r = 42;
-  const gap = 1.5;
+function toPath(startAngle: number, endAngle: number, rx: number, ry: number) {
+  const s = { x: CX + rx * Math.cos(startAngle), y: CY + ry * Math.sin(startAngle) };
+  const e = { x: CX + rx * Math.cos(endAngle),   y: CY + ry * Math.sin(endAngle)   };
+  const large = endAngle - startAngle > Math.PI ? 1 : 0;
+  return `M ${s.x} ${s.y} A ${rx} ${ry} 0 ${large} 1 ${e.x} ${e.y}`;
+}
 
-  let cumAngle = -90;
+function DonutSlice({
+  start, end, color, isHovered, onHover, onLeave,
+}: {
+  start: number; end: number; color: string;
+  isHovered: boolean; onHover: () => void; onLeave: () => void;
+}) {
+  const gap = 0.025;
+  const s = start + gap, e = end - gap;
+  const ro = isHovered ? R_OUT + 5 : R_OUT;
 
-  const slices = reasons.map((item, i) => {
-    const pct = item.count / total;
-    const angleDeg = pct * 360;
-    const startAngle = cumAngle;
-    const endAngle = cumAngle + angleDeg - gap;
-    cumAngle += angleDeg;
+  const p1 = { x: CX + ro * Math.cos(s),   y: CY + ro * Math.sin(s) };
+  const p2 = { x: CX + ro * Math.cos(e),   y: CY + ro * Math.sin(e) };
+  const p3 = { x: CX + R_IN * Math.cos(e), y: CY + R_IN * Math.sin(e) };
+  const p4 = { x: CX + R_IN * Math.cos(s), y: CY + R_IN * Math.sin(s) };
+  const large = e - s > Math.PI ? 1 : 0;
 
-    const toRad = (d: number) => (d * Math.PI) / 180;
-    const x1 = cx + R * Math.cos(toRad(startAngle));
-    const y1 = cy + R * Math.sin(toRad(startAngle));
-    const x2 = cx + R * Math.cos(toRad(endAngle));
-    const y2 = cy + R * Math.sin(toRad(endAngle));
-    const x3 = cx + r * Math.cos(toRad(endAngle));
-    const y3 = cy + r * Math.sin(toRad(endAngle));
-    const x4 = cx + r * Math.cos(toRad(startAngle));
-    const y4 = cy + r * Math.sin(toRad(startAngle));
-    const largeArc = angleDeg - gap > 180 ? 1 : 0;
-
-    const midAngle = startAngle + (angleDeg - gap) / 2;
-    const labelR = (R + r) / 2;
-    const lx = cx + labelR * Math.cos(toRad(midAngle));
-    const ly = cy + labelR * Math.sin(toRad(midAngle));
-
-    const d = [
-      `M ${x1} ${y1}`,
-      `A ${R} ${R} 0 ${largeArc} 1 ${x2} ${y2}`,
-      `L ${x3} ${y3}`,
-      `A ${r} ${r} 0 ${largeArc} 0 ${x4} ${y4}`,
-      "Z",
-    ].join(" ");
-
-    return { ...item, d, lx, ly, pct, i };
-  });
-
-  const hov = hovered !== null ? slices[hovered] : null;
+  const d = `M ${p1.x} ${p1.y} A ${ro} ${ro} 0 ${large} 1 ${p2.x} ${p2.y} L ${p3.x} ${p3.y} A ${R_IN} ${R_IN} 0 ${large} 0 ${p4.x} ${p4.y} Z`;
 
   return (
-    <div className="relative flex-shrink-0">
-      <svg width="180" height="180" onMouseLeave={() => setHovered(null)}>
-        {slices.map((s) => (
-          <path
-            key={String(s.key)}
-            d={s.d}
-            fill={s.color}
-            opacity={hovered === null || hovered === s.i ? 1 : 0.35}
-            style={{ cursor: "pointer", transition: "opacity 0.15s" }}
-            onMouseEnter={() => setHovered(s.i)}
-          />
-        ))}
-        {slices.map((s) => {
-          const pctVal = Math.round(s.pct * 100);
-          if (pctVal < 4) return null;
-          return (
-            <text
-              key={String(s.key) + "label"}
-              x={s.lx}
-              y={s.ly}
-              textAnchor="middle"
-              dominantBaseline="central"
-              fill="white"
-              fontSize="9"
-              fontWeight="700"
-              style={{ pointerEvents: "none" }}
-            >
-              {pctVal}%
-            </text>
-          );
-        })}
-        {hov ? (
-          <>
-            <text x={cx} y={cy - 8} textAnchor="middle" fill="white" fontSize="18" fontWeight="700">
-              {hov.count}
-            </text>
-            <text x={cx} y={cy + 10} textAnchor="middle" fill={hov.color} fontSize="8">
-              {hov.short}
-            </text>
-          </>
-        ) : (
-          <>
-            <text x={cx} y={cy - 8} textAnchor="middle" fill="white" fontSize="18" fontWeight="700">
-              {total}
-            </text>
-            <text x={cx} y={cy + 10} textAnchor="middle" fill="rgba(255,255,255,0.4)" fontSize="8">
-              всего
-            </text>
-          </>
-        )}
-      </svg>
-    </div>
+    <path
+      d={d}
+      fill={color}
+      opacity={isHovered ? 1 : 0.82}
+      style={{ transition: "all 0.2s ease", cursor: "pointer", filter: isHovered ? `drop-shadow(0 0 8px ${color})` : "none" }}
+      onMouseEnter={onHover}
+      onMouseLeave={onLeave}
+    />
   );
 }
 
 export default function ReasonsChart() {
+  const [hovered, setHovered] = useState<number | null>(null);
+  const total = DATA.reduce((s, d) => s + d.value, 0);
+
+  let angle = -Math.PI / 2;
+  const slices = DATA.map((d) => {
+    const sweep = (d.value / total) * 2 * Math.PI;
+    const s = angle;
+    angle += sweep;
+    return { ...d, start: s, end: angle };
+  });
+
+  const activeItem = hovered !== null ? DATA[hovered] : null;
+
   return (
-    <div className="glass rounded-2xl p-5 animate-fade-in" style={{ animationDelay: "180ms" }}>
-      <div className="mb-4">
-        <h2 className="text-sm font-semibold text-foreground">Причины отказов и статусов</h2>
-        <p className="text-[11px] text-muted-foreground mt-0.5">Распределение по всем городам</p>
+    <div className="glass rounded-2xl p-5 h-full animate-rise" style={{ animationDelay: "140ms" }}>
+      <div className="flex items-center justify-between mb-5">
+        <div>
+          <h2 className="text-[13px] font-semibold text-foreground">Причины результата</h2>
+          <p className="text-[11px] mt-0.5" style={{ color: "hsl(var(--muted-foreground))" }}>
+            Распределение по итогам
+          </p>
+        </div>
+        <span
+          className="text-[11px] font-medium px-2.5 py-1 rounded-lg"
+          style={{ background: "rgba(255,255,255,0.04)", color: "hsl(var(--muted-foreground))" }}
+        >
+          {total} звонков
+        </span>
       </div>
 
-      <div className="flex gap-6 items-start">
-        <DonutChart />
+      <div className="flex items-center gap-5">
+        {/* Donut */}
+        <div className="flex-shrink-0">
+          <svg width={180} height={180} viewBox="0 0 180 180">
+            <defs>
+              <filter id="donut-shadow">
+                <feDropShadow dx="0" dy="2" stdDeviation="4" floodOpacity="0.3" />
+              </filter>
+            </defs>
+            {slices.map((sl, i) => (
+              <DonutSlice
+                key={sl.label}
+                start={sl.start}
+                end={sl.end}
+                color={sl.color}
+                isHovered={hovered === i}
+                onHover={() => setHovered(i)}
+                onLeave={() => setHovered(null)}
+              />
+            ))}
 
-        <div className="flex-1 grid grid-cols-2 gap-x-5 gap-y-1.5 self-center">
-          {reasons.map((r) => {
-            const pct = ((r.count / total) * 100).toFixed(1);
-            return (
-              <div key={String(r.key)} className="flex items-center gap-2 min-w-0">
-                <span
-                  className="w-2.5 h-2.5 rounded-sm shrink-0"
-                  style={{ background: r.color }}
-                />
-                <span className="text-[11px] text-muted-foreground truncate flex-1 min-w-0">
-                  {r.short}
-                </span>
-                <span
-                  className="text-[11px] font-semibold font-mono-num shrink-0"
-                  style={{ color: r.color }}
-                >
-                  {pct}%
-                </span>
-              </div>
-            );
-          })}
+            {/* Center */}
+            <circle cx={CX} cy={CY} r={R_IN - 2} fill="hsl(var(--card))" />
+            {activeItem ? (
+              <>
+                <text x={CX} y={CY - 8} textAnchor="middle" fontSize="18" fontWeight="700" fill={activeItem.color} fontFamily="JetBrains Mono">
+                  {activeItem.value}%
+                </text>
+                <text x={CX} y={CY + 10} textAnchor="middle" fontSize="9" fill="rgba(255,255,255,0.4)">
+                  {activeItem.label.length > 10 ? activeItem.label.slice(0, 10) + "…" : activeItem.label}
+                </text>
+              </>
+            ) : (
+              <>
+                <text x={CX} y={CY - 6} textAnchor="middle" fontSize="20" fontWeight="700" fill="white" fontFamily="JetBrains Mono">
+                  {total}
+                </text>
+                <text x={CX} y={CY + 11} textAnchor="middle" fontSize="9" fill="rgba(255,255,255,0.35)">
+                  всего
+                </text>
+              </>
+            )}
+          </svg>
+        </div>
+
+        {/* Legend */}
+        <div className="flex-1 space-y-2.5 min-w-0">
+          {DATA.map((d, i) => (
+            <div
+              key={d.label}
+              className="flex items-center gap-2.5 cursor-pointer rounded-lg px-2 py-1.5 transition-all duration-150"
+              style={{
+                background: hovered === i ? d.colorDim : "transparent",
+              }}
+              onMouseEnter={() => setHovered(i)}
+              onMouseLeave={() => setHovered(null)}
+            >
+              <div
+                className="w-2 h-2 rounded-full flex-shrink-0"
+                style={{ background: d.color, boxShadow: hovered === i ? `0 0 6px ${d.color}` : "none" }}
+              />
+              <span
+                className="text-[12px] flex-1 truncate"
+                style={{ color: hovered === i ? "hsl(var(--foreground))" : "hsl(var(--muted-foreground))" }}
+              >
+                {d.label}
+              </span>
+              <span
+                className="text-[13px] font-semibold font-mono-num flex-shrink-0"
+                style={{ color: d.color }}
+              >
+                {d.value}%
+              </span>
+            </div>
+          ))}
         </div>
       </div>
     </div>
