@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Sidebar from "./dashboard/Sidebar";
 import Header from "./dashboard/Header";
+import WelcomeBanner from "./dashboard/WelcomeBanner";
 import KpiCards from "./dashboard/KpiCards";
 import CityTable from "./dashboard/CityTable";
 import ReasonsChart from "./dashboard/ReasonsChart";
@@ -13,22 +14,25 @@ export default function Dashboard() {
   const [tab, setTab] = useState<ViewTab>("overview");
 
   return (
-    <div className="flex h-screen overflow-hidden" style={{ background: "linear-gradient(180deg, #080d1e 0%, #0b1135 50%, #060a1a 100%)" }}>
+    <div className="flex h-screen overflow-hidden bg-[var(--slate-50)]">
       <Sidebar activeTab={tab} onTab={setTab} />
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header />
-        <main className="flex-1 overflow-y-auto p-6 space-y-5">
-          <KpiCards />
-          <div className="grid grid-cols-12 gap-5">
-            <div className="col-span-12 xl:col-span-5">
-              <ReasonsChart />
+        <main className="flex-1 overflow-y-auto">
+          <div className="max-w-[1360px] mx-auto px-8 py-6 space-y-6">
+            <WelcomeBanner />
+            <KpiCards />
+            <div className="grid grid-cols-12 gap-6">
+              <div className="col-span-12 xl:col-span-5">
+                <ReasonsChart />
+              </div>
+              <div className="col-span-12 xl:col-span-7">
+                <ConversionMap />
+              </div>
             </div>
-            <div className="col-span-12 xl:col-span-7">
-              <ConversionMap />
-            </div>
+            <MonthlyChart />
+            <CityTable />
           </div>
-          <MonthlyChart />
-          <CityTable />
         </main>
       </div>
     </div>

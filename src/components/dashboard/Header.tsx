@@ -8,110 +8,86 @@ export default function Header() {
   const [open, setOpen] = useState(false);
 
   return (
-    <header
-      className="h-[72px] flex items-center px-8 gap-4 shrink-0"
-      style={{
-        background: "rgba(11,17,55,0.85)",
-        borderBottom: "1px solid #56577a33",
-        backdropFilter: "blur(21px)",
-        WebkitBackdropFilter: "blur(21px)",
-      }}
-    >
-      {/* Title */}
+    <header className="h-16 flex items-center px-8 gap-4 shrink-0 bg-white/80 backdrop-blur-xl border-b border-[var(--slate-200)]">
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2.5">
-          <h1 className="text-[16px] font-bold text-white tracking-tight">
+        <div className="flex items-center gap-3">
+          <h1 className="text-[16px] font-bold text-[var(--slate-900)] tracking-tight">
             Дашборд обзвона
           </h1>
-          <span
-            className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide"
-            style={{ background: "rgba(1,181,116,0.15)", color: "#01b574", border: "1px solid rgba(1,181,116,0.25)" }}
-          >
-            <div className="w-1.5 h-1.5 rounded-full pulse-dot" style={{ background: "#01b574" }} />
-            Live
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-[var(--emerald-soft)] text-[var(--emerald)]">
+            <div className="w-1.5 h-1.5 rounded-full bg-[var(--emerald)] pulse-dot" />
+            Обновлено
           </span>
         </div>
-        <p className="text-[11px] mt-0.5" style={{ color: "#a0aec0" }}>
-          Данные обновлены: {new Date().toLocaleString("ru-RU", { hour: "2-digit", minute: "2-digit" })}
+        <p className="text-[11px] text-[var(--slate-400)] mt-0.5">
+          {new Date().toLocaleString("ru-RU", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" })}
         </p>
+      </div>
+
+      {/* Search */}
+      <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[var(--slate-100)] w-56">
+        <Icon name="Search" size={14} className="text-[var(--slate-400)]" />
+        <input
+          placeholder="Поиск по дашборду..."
+          className="bg-transparent border-none outline-none text-[12px] text-[var(--slate-700)] w-full placeholder:text-[var(--slate-400)]"
+        />
+        <kbd className="text-[9px] font-mono font-medium text-[var(--slate-400)] bg-white px-1.5 py-0.5 rounded border border-[var(--slate-200)]">⌘K</kbd>
       </div>
 
       {/* Period picker */}
       <div className="relative">
         <button
           onClick={() => setOpen(!open)}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl text-[12px] font-semibold transition-all duration-150"
-          style={{
-            background: "linear-gradient(127.09deg, rgba(67,24,255,0.3) 19.41%, rgba(0,117,255,0.2) 76.65%)",
-            border: "1px solid rgba(0,117,255,0.3)",
-            color: "#fff",
-          }}
+          className="flex items-center gap-2 px-4 py-2 rounded-xl text-[12px] font-semibold bg-white border border-[var(--slate-200)] text-[var(--slate-700)] hover:border-[var(--violet)] hover:text-[var(--violet)] transition-all duration-150"
         >
-          <Icon name="Calendar" size={13} style={{ color: "#0075ff" }} />
+          <Icon name="Calendar" size={14} className="text-[var(--violet)]" />
           {periods[period]}
           <Icon
             name="ChevronDown"
             size={12}
-            className="transition-transform duration-150"
-            style={{
-              color: "#a0aec0",
-              transform: open ? "rotate(180deg)" : "rotate(0deg)",
-            }}
+            className="text-[var(--slate-400)] transition-transform duration-200"
+            style={{ transform: open ? "rotate(180deg)" : "rotate(0deg)" }}
           />
         </button>
         {open && (
-          <div
-            className="absolute right-0 top-full mt-2 w-44 rounded-2xl overflow-hidden z-50 animate-scale-in"
-            style={{
-              background: "linear-gradient(159.02deg, #0f1535 14.25%, #111c44 86.14%)",
-              border: "1px solid #56577a55",
-              boxShadow: "0 20px 60px rgba(0,0,0,0.6)",
-            }}
-          >
-            {periods.map((p, i) => (
-              <button
-                key={p}
-                onClick={() => { setPeriod(i); setOpen(false); }}
-                className="w-full flex items-center gap-2.5 px-4 py-2.5 text-[12px] font-medium text-left transition-colors duration-100"
-                style={{
-                  color: i === period ? "#0075ff" : "#a0aec0",
-                  background: i === period ? "rgba(0,117,255,0.12)" : "transparent",
-                }}
-                onMouseEnter={e => { if (i !== period) e.currentTarget.style.background = "rgba(255,255,255,0.04)"; }}
-                onMouseLeave={e => { if (i !== period) e.currentTarget.style.background = "transparent"; }}
-              >
-                {i === period
-                  ? <Icon name="Check" size={12} style={{ color: "#0075ff" }} />
-                  : <span className="w-3 inline-block" />}
-                {p}
-              </button>
-            ))}
-          </div>
+          <>
+            <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
+            <div className="absolute right-0 top-full mt-2 w-48 rounded-2xl overflow-hidden z-50 animate-scale-in bg-white border border-[var(--slate-200)] shadow-xl shadow-slate-200/50">
+              {periods.map((p, i) => (
+                <button
+                  key={p}
+                  onClick={() => { setPeriod(i); setOpen(false); }}
+                  className={`w-full flex items-center gap-2.5 px-4 py-2.5 text-[12px] font-medium text-left transition-colors duration-100 ${
+                    i === period
+                      ? "bg-[var(--violet-soft)] text-[var(--violet)]"
+                      : "text-[var(--slate-600)] hover:bg-[var(--slate-50)]"
+                  }`}
+                >
+                  {i === period && <Icon name="Check" size={12} className="text-[var(--violet)]" />}
+                  {i !== period && <span className="w-3" />}
+                  {p}
+                </button>
+              ))}
+            </div>
+          </>
         )}
       </div>
 
       {/* Actions */}
       <div className="flex items-center gap-1">
         {[
-          { icon: "Download", tip: "Экспорт" },
-          { icon: "RefreshCw", tip: "Обновить" },
-          { icon: "SlidersHorizontal", tip: "Настройки" },
-        ].map(({ icon, tip }) => (
+          { icon: "Bell", tip: "Уведомления", badge: true },
+          { icon: "Download", tip: "Экспорт", badge: false },
+        ].map(({ icon, tip, badge }) => (
           <button
             key={icon}
             title={tip}
-            className="w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-150"
-            style={{ color: "#a0aec0", background: "transparent" }}
-            onMouseEnter={e => {
-              e.currentTarget.style.background = "rgba(255,255,255,0.07)";
-              e.currentTarget.style.color = "#fff";
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.background = "transparent";
-              e.currentTarget.style.color = "#a0aec0";
-            }}
+            className="relative w-9 h-9 rounded-xl flex items-center justify-center text-[var(--slate-400)] hover:bg-[var(--slate-100)] hover:text-[var(--slate-700)] transition-all duration-150"
           >
-            <Icon name={icon} size={15} />
+            <Icon name={icon} size={16} />
+            {badge && (
+              <div className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[var(--rose)] ring-2 ring-white" />
+            )}
           </button>
         ))}
       </div>

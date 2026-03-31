@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Icon from "@/components/ui/icon";
 
 const CITIES = [
   { name: "Москва",          conv: 42, calls: 3840, rank: 1 },
@@ -12,11 +13,10 @@ const CITIES = [
 ];
 
 function getColor(conv: number) {
-  if (conv >= 40) return "#01b574";
-  if (conv >= 32) return "#0075ff";
-  if (conv >= 26) return "#4299e1";
-  if (conv >= 20) return "#f6ad55";
-  return "#e31a1a";
+  if (conv >= 40) return { color: "var(--emerald)", soft: "var(--emerald-soft)", label: "Отлично" };
+  if (conv >= 32) return { color: "var(--violet)",  soft: "var(--violet-soft)",  label: "Хорошо" };
+  if (conv >= 26) return { color: "var(--sky)",     soft: "var(--sky-soft)",     label: "Средне" };
+  return              { color: "var(--amber)",   soft: "var(--amber-soft)",   label: "Низко" };
 }
 
 export default function ConversionMap() {
@@ -24,73 +24,72 @@ export default function ConversionMap() {
   const max = Math.max(...CITIES.map((c) => c.conv));
 
   return (
-    <div className="vui-card rounded-2xl p-5 h-full animate-rise" style={{ animationDelay: "210ms" }}>
-      {/* Header */}
+    <div className="card-base p-5 h-full animate-rise" style={{ animationDelay: "320ms" }}>
       <div className="flex items-center justify-between mb-5">
         <div>
-          <h2 className="text-[14px] font-bold text-white">Конверсия по городам</h2>
-          <p className="text-[11px] mt-0.5" style={{ color: "#a0aec0" }}>
-            Топ-8 городов по результату
-          </p>
+          <h2 className="text-[14px] font-bold text-[var(--slate-900)]">Конверсия по городам</h2>
+          <p className="text-[11px] text-[var(--slate-400)] mt-0.5">Топ-8 городов по результату</p>
         </div>
-        <div className="flex items-center gap-3 text-[10px] font-semibold" style={{ color: "#a0aec0" }}>
-          {[["≥40%", "#01b574"], ["≥32%", "#0075ff"], ["≥26%", "#4299e1"], ["<26%", "#f6ad55"]].map(([label, color]) => (
+        <div className="flex items-center gap-3 text-[10px] font-semibold text-[var(--slate-400)]">
+          {[
+            ["≥40%", "var(--emerald)"],
+            ["≥32%", "var(--violet)"],
+            ["≥26%", "var(--sky)"],
+            ["<26%", "var(--amber)"]
+          ].map(([label, color]) => (
             <div key={label} className="flex items-center gap-1.5">
-              <div className="w-2 h-2 rounded-full" style={{ background: color as string }} />
+              <div className="w-2 h-2 rounded" style={{ background: color, borderRadius: 3 }} />
               {label}
             </div>
           ))}
         </div>
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-1.5">
         {CITIES.map((city, i) => {
-          const color = getColor(city.conv);
+          const { color, soft } = getColor(city.conv);
           const pct = (city.conv / max) * 100;
           const isHov = hovered === i;
 
           return (
             <div
               key={city.name}
-              className="flex items-center gap-3 rounded-xl px-3 py-2.5 cursor-default transition-all duration-150"
-              style={{
-                background: isHov ? `${color}18` : "rgba(255,255,255,0.02)",
-                border: `1px solid ${isHov ? color + "40" : "rgba(86,87,122,0.2)"}`,
-              }}
+              className="flex items-center gap-3 rounded-xl px-3 py-2.5 cursor-default transition-all duration-200"
+              style={{ background: isHov ? soft : "transparent" }}
               onMouseEnter={() => setHovered(i)}
               onMouseLeave={() => setHovered(null)}
             >
-              <span
-                className="w-5 text-center text-[11px] font-bold font-mono-num flex-shrink-0"
-                style={{ color: i < 3 ? color : "#56577a" }}
+              <div
+                className="w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-bold flex-shrink-0"
+                style={{ background: i < 3 ? soft : "var(--slate-100)", color: i < 3 ? color : "var(--slate-400)" }}
               >
                 {city.rank}
-              </span>
+              </div>
 
               <span
                 className="text-[12.5px] font-semibold w-36 flex-shrink-0 truncate transition-colors duration-150"
-                style={{ color: isHov ? "#fff" : "#a0aec0" }}
+                style={{ color: isHov ? "var(--slate-900)" : "var(--slate-600)" }}
               >
                 {city.name}
               </span>
 
-              <div className="flex-1 relative h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.05)" }}>
+              <div className="flex-1 relative h-2 rounded-full overflow-hidden bg-[var(--slate-100)]">
                 <div
                   className="h-full rounded-full bar-fill"
                   style={{
                     width: `${pct}%`,
-                    background: `linear-gradient(90deg, ${color}88, ${color})`,
-                    boxShadow: isHov ? `0 0 10px ${color}66` : "none",
+                    background: `linear-gradient(90deg, ${color}99, ${color})`,
                   }}
                 />
               </div>
 
-              <span className="w-16 text-right text-[10px] font-medium flex-shrink-0" style={{ color: "#56577a" }}>
-                {city.calls.toLocaleString("ru")}
+              <span className="w-14 text-right text-[10px] font-medium text-[var(--slate-400)] flex-shrink-0">
+                {city.calls.toLocaleString("ru")} 
+                <Icon name="Phone" size={9} className="inline ml-0.5 opacity-50" />
               </span>
 
               <span
-                className="w-10 text-right text-[13px] font-bold font-mono-num flex-shrink-0"
+                className="w-12 text-right text-[13px] font-bold font-mono-num flex-shrink-0"
                 style={{ color }}
               >
                 {city.conv}%
